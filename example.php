@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 use Dotenv\Dotenv;
 use InMotivClient\InMotivClient;
 use InMotivClient\ProductionEndpointProvider;
@@ -23,10 +25,10 @@ $client = new InMotivClient(
 
 //driver licence check
 $result = $client->isDriverLicenceValid(
-    getenv('DRIVER_LICENCE_NUMBER'),
-    getenv('BIRTHDAY_YEAR'),
-    getenv('BIRTHDAY_MONTH'),
-    getenv('BIRTHDAY_DAY')
+    (int)getenv('DRIVER_LICENCE_NUMBER'),
+    (int)getenv('BIRTHDAY_YEAR'),
+    (int)getenv('BIRTHDAY_MONTH'),
+    (int)getenv('BIRTHDAY_DAY')
 );
 
 var_dump($result);

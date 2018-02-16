@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace InMotivClient;
 
 use DOMDocument;
@@ -7,13 +9,7 @@ use InMotivClient\Exception\XmlBuilder\RequestXmlInvalidException;
 
 class XmlBuilder
 {
-    /**
-     * @param string $username
-     * @param string $password
-     * @param string $nonce
-     * @return string
-     */
-    public function renderHeader($username, $password, $nonce)
+    public function renderHeader(string $username, string $password, string $nonce): string
     {
         $data = [
             'username' => $username,
@@ -23,14 +19,11 @@ class XmlBuilder
         return $this->buildXml('soapHeader', $data);
     }
 
-    /**
-     * @param string $clientNumber
-     * @param string $drivingLicenceNumber
-     * @param string $birthday
-     * @return string
-     */
-    public function buildRequestDocumentVerificatieSysteem($clientNumber, $drivingLicenceNumber, $birthday)
-    {
+    public function buildRequestDocumentVerificatieSysteem(
+        string $clientNumber,
+        int $drivingLicenceNumber,
+        string $birthday
+    ): string {
         $data = [
             'rdc' => $clientNumber,
             'drivingLicenceNumber' => $drivingLicenceNumber,
@@ -39,12 +32,7 @@ class XmlBuilder
         return $this->buildXml('documentVerificatieSysteem', $data);
     }
 
-    /**
-     * @param string $clientNumber
-     * @param string $numberplate
-     * @return string
-     */
-    public function buildRequestOpvragenVoertuigscanMSI($clientNumber, $numberplate)
+    public function buildRequestOpvragenVoertuigscanMSI(string $clientNumber, string $numberplate): string
     {
         $data = [
             'rdc' => $clientNumber,
@@ -54,23 +42,15 @@ class XmlBuilder
     }
 
     /**
-     * @param string $templateFilename
-     * @param array $vars
-     * @return string
      * @throws PlaceholderNotFoundException
      */
-    protected function buildXml($templateFilename, array $vars = [])
+    protected function buildXml(string $templateFilename, array $vars = []): string
     {
         $template = $this->loadTemplate($templateFilename);
         return $this->render($template, $vars);
     }
 
-    /**
-     * @param string $template
-     * @param array $vars
-     * @return string
-     */
-    protected function render($template, array $vars)
+    protected function render(string $template, array $vars): string
     {
         foreach ($vars as $k => $v) {
             $search = sprintf('{{ %s }}', $k);
@@ -89,11 +69,7 @@ class XmlBuilder
         return $template;
     }
 
-    /**
-     * @param string $filename
-     * @return string
-     */
-    protected function loadTemplate($filename)
+    protected function loadTemplate(string $filename): string
     {
         $path = sprintf(__DIR__ . '/../resources/xmlTemplates/%s.xml', $filename);
         return file_get_contents($path);

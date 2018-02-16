@@ -1,15 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace InMotivClient;
 
 interface EndpointProviderInterface
 {
-    /**
-     * @return string
-     */
-    public function getDVS();
+    public function getDVS(): string;
 
-    /**
-     * @return string
-     */
-    public function getVTS();
+    public function getVTS(): string;
 }

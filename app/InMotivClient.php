@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace InMotivClient;
 
 use InMotivClient\Container\VehicleInfoContainer;
@@ -31,21 +33,13 @@ class InMotivClient
     /** @var EndpointProviderInterface */
     private $endpointProvider;
 
-    /**
-     * @param EndpointProviderInterface $endpointProvider
-     * @param XmlBuilder $xmlBuilder
-     * @param string $clientNumber
-     * @param string $username
-     * @param string $password
-     * @param bool $debug
-     */
     public function __construct(
         EndpointProviderInterface $endpointProvider,
         XmlBuilder $xmlBuilder,
-        $clientNumber,
-        $username,
-        $password,
-        $debug = false
+        string $clientNumber,
+        string $username,
+        string $password,
+        bool $debug = false
     ) {
         $this->endpointProvider = $endpointProvider;
         $this->xmlBuilder = $xmlBuilder;
@@ -58,20 +52,15 @@ class InMotivClient
     }
 
     /**
-     * @param string $drivingLicenceNumber
-     * @param int $birthYear
-     * @param int $birthMonth
-     * @param int $birthDay
-     * @return bool
      * @throws IncorrectFieldException
      * @throws SoapException
      */
-    public function isDriverLicenceValid($drivingLicenceNumber, $birthYear, $birthMonth, $birthDay)
-    {
-        if (!is_numeric($drivingLicenceNumber)) {
-            throw new IncorrectFieldException('Driving licence number should be numeric');
-        }
-
+    public function isDriverLicenceValid(
+        int $drivingLicenceNumber,
+        int $birthYear,
+        int $birthMonth,
+        int $birthDay
+    ): bool {
         $birthday = sprintf('%04d%02d%02d', $birthYear, $birthMonth, $birthDay);
         $xml = $this->xmlBuilder->buildRequestDocumentVerificatieSysteem(
             $this->clientNumber,
@@ -91,35 +80,24 @@ class InMotivClient
         return $value === 'J';
     }
 
-    /**
-     * @param string $numberplate
-     * @return VehicleInfoContainer
-     */
-    public function getVehicleInfo($numberplate)
+    public function getVehicleInfo(string $numberplate): VehicleInfoContainer
     {
         $sxe = $this->makeVehicleInfoRequest($numberplate, (bool)getenv('INMOTIV_CACHE'));
         return $this->buildVehicleInfoContainer($sxe);
     }
 
-    /**
-     * @param string $xml
-     * @return VehicleInfoContainer
-     */
-    public function getVehicleInfoFromXML($xml)
+    public function getVehicleInfoFromXML(string $xml): VehicleInfoContainer
     {
         $sxe = new SimpleXMLElement($xml);
         return $this->buildVehicleInfoContainer($sxe);
     }
 
     /**
-     * @param SimpleXMLElement $sxe
-     * @return VehicleInfoContainer
-     *
      * @throws VehicleNotFoundException
      * @throws SoapException
      * @throws IncorrectFieldException
      */
-    private function buildVehicleInfoContainer(SimpleXMLElement $sxe)
+    private function buildVehicleInfoContainer(SimpleXMLElement $sxe): VehicleInfoContainer
     {
         $nodes = $sxe->xpath('//*[local-name() = "Kentekengegevens"][@Verwerkingsstatus="00"]');
         if (!count($nodes)) {
@@ -127,12 +105,18 @@ class InMotivClient
         }
 
         $brand = $this->extractFirstNodeValue($sxe, '//*[local-name() = "Merk"]');
-        $productionYear = $this->extractFirstNodeValue($sxe, '//*[local-name() = "DatumEersteToelating"]');
+        try {
+            $productionYear = $this->extractFirstNodeValue($sxe, '//*[local-name() = "DatumEersteToelating"]');
+        } catch (UnexpectedResponseException $e) {
+            $productionYear = null;
+        }
+
         try {
             $cc = (int)$this->extractFirstNodeValue($sxe, '//*[local-name() = "Cilinderinhoud"]');
         } catch (UnexpectedResponseException $e) {
             $cc = null;
         }
+
         $horsePower = $this->extractFirstNodeValue($sxe, '//*[local-name() = "VermogenPK"]');
         $weight = $this->extractFirstNodeValue($sxe, '//*[local-name() = "MassaLeegVoertuig"]');
         try {
@@ -149,8 +133,8 @@ class InMotivClient
 
         $result = new VehicleInfoContainer(
             $brand,
-            (int)substr($productionYear, 0, 4),
-            $cc,
+            $productionYear === null ? null : (int)substr($productionYear, 0, 4),
+            $cc === null ? null : (int)$cc,
             (int)$horsePower,
             (int)$weight,
             $catalogPrice,
@@ -162,12 +146,7 @@ class InMotivClient
         return $result;
     }
 
-    /**
-     * @param string $numberplate
-     * @param bool $useCache
-     * @return SimpleXMLElement
-     */
-    private function makeVehicleInfoRequest($numberplate, $useCache)
+    private function makeVehicleInfoRequest(string $numberplate, bool $useCache): SimpleXMLElement
     {
         $xml = $this->xmlBuilder->buildRequestOpvragenVoertuigscanMSI($this->clientNumber, $numberplate);
         $client = $this->getClient($this->endpointProvider->getVTS());
@@ -188,11 +167,7 @@ class InMotivClient
         return $sxe;
     }
 
-    /**
-     * @param string $url
-     * @return SoapClientWrapper
-     */
-    private function getClient($url)
+    private function getClient(string $url): SoapClientWrapper
     {
         if (isset($this->clients[$url])) {
             return $this->clients[$url];
@@ -207,22 +182,12 @@ class InMotivClient
         return $this->clients[$url];
     }
 
-    /**
-     * @param SimpleXMLElement $sax
-     * @param string $xpathExpression
-     * @return string
-     */
-    private function extractFirstNodeValue(SimpleXMLElement $sax, $xpathExpression)
+    private function extractFirstNodeValue(SimpleXMLElement $sax, string $xpathExpression): string
     {
         return (string)$this->extractFirstNode($sax, $xpathExpression);
     }
 
-    /**
-     * @param SimpleXMLElement $sax
-     * @param string $xpathExpression
-     * @return SimpleXMLElement
-     */
-    private function extractFirstNode(SimpleXMLElement $sax, $xpathExpression)
+    private function extractFirstNode(SimpleXMLElement $sax, string $xpathExpression): SimpleXMLElement
     {
         $nodes = $sax->xpath($xpathExpression);
         if (count($nodes) < 1) {

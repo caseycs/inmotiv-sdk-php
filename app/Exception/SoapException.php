@@ -1,16 +1,11 @@
 <?php
-namespace InMotivClient\Exception;
+declare(strict_types=1);
 
-use Exception;
+namespace InMotivClient\Exception;
 
 class SoapException extends InMotivException
 {
-    /**
-     * InMotivException constructor.
-     * @param string $url
-     * @param string $method
-     */
-    public function __construct($url, $method, Exception $prev)
+    public function __construct(string $url, string $method, \Throwable $prev)
     {
         $this->url = $url;
         $this->method = $method;

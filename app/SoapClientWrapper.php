@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace InMotivClient;
 
 use Exception;
@@ -38,14 +40,7 @@ class SoapClientWrapper
     /** @var bool */
     private $debug;
 
-    /**
-     * @param string $url
-     * @param string $username
-     * @param string $password
-     * @param XmlBuilder $xmlBuilder
-     * @param bool $debug
-     */
-    public function __construct($url, $username, $password, XmlBuilder $xmlBuilder, $debug)
+    public function __construct(string $url, string $username, string $password, XmlBuilder $xmlBuilder, bool $debug)
     {
         $this->url = $url;
         $this->username = $username;
@@ -57,13 +52,10 @@ class SoapClientWrapper
     }
 
     /**
-     * @param string $method
-     * @param string $xml
-     * @return SimpleXMLElement
      * @throws SoapException
      * @throws IncorrectFieldException
      */
-    public function request($method, $xml)
+    public function request(string $method, string $xml): SimpleXMLElement
     {
         try {
             $this->soapClient->__setSoapHeaders($this->generateWSSecurityHeader());
@@ -91,10 +83,7 @@ class SoapClientWrapper
         }
     }
 
-    /**
-     * @param string $method
-     */
-    private function printLastRequestDebug($method)
+    private function printLastRequestDebug(string $method): void
     {
         printf('REQUEST %s', $method);
         echo PHP_EOL;
@@ -107,12 +96,9 @@ class SoapClientWrapper
         echo PHP_EOL . PHP_EOL;
     }
 
-    /**
-     * @return SoapHeader
-     */
-    private function generateWSSecurityHeader()
+    private function generateWSSecurityHeader(): SoapHeader
     {
-        $xml = $this->xmlBuilder->renderHeader($this->username, $this->password, sha1(mt_rand()));
+        $xml = $this->xmlBuilder->renderHeader($this->username, $this->password, sha1((string)mt_rand()));
         return new SoapHeader(self::HEADER_NAMESPACE, 'Security', new SoapVar($xml, XSD_ANYXML));
     }
 }

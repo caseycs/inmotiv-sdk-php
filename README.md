@@ -5,7 +5,7 @@ For example you can check whether driver licence is valid or not by number and o
 
 ## Requirements
 
-* PHP 5.6
+* PHP 7.1
 * SOAP extension
 
 ## How to use
@@ -73,6 +73,8 @@ BIRTHDAY_DAY=10
 
 NUMBERPLATES_MOTORCYCLE=05MMGG
 NUMBERPLATES_CAR=XXAAAX
+
+NUMBERPLATES_MOTORCYCLE_WITHOUT_FIRST_REGISTRATION_DATE=XXAAAX
 ```
 
 Then just run `./vendor/bin/phpunit`. Everything should be green.

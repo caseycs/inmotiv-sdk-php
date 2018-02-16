@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace InMotivClient\Container;
 
 class VehicleInfoContainer
@@ -30,29 +32,17 @@ class VehicleInfoContainer
     /** @var string */
     private $rawResponse;
 
-    /**
-     * @param string $brand
-     * @param int $productionYear
-     * @param int $engineCC
-     * @param int $horsePower
-     * @param int $weight
-     * @param int $catalogPrice
-     * @param int $rdwClass
-     * @param bool $isStolen
-     * @param string $rawResponse
-     */
     public function __construct(
-        $brand,
-        $productionYear,
-        $engineCC,
-        $horsePower,
-        $weight,
-        $catalogPrice,
-        $rdwClass,
-        $isStolen,
-        $rawResponse
-    )
-    {
+        string $brand,
+        ?int $productionYear,
+        ?int $engineCC,
+        int $horsePower,
+        int $weight,
+        ?int $catalogPrice,
+        int $rdwClass,
+        bool $isStolen,
+        string $rawResponse
+    ) {
         $this->brand = $brand;
         $this->productionYear = $productionYear;
         $this->engineCC = $engineCC;
@@ -64,74 +54,47 @@ class VehicleInfoContainer
         $this->rawResponse = $rawResponse;
     }
 
-    /**
-     * @return string
-     */
-    public function getBrand()
+    public function getBrand(): string
     {
         return $this->brand;
     }
 
-    /**
-     * @return int
-     */
-    public function getProductionYear()
+    public function getProductionYear(): ?int
     {
         return $this->productionYear;
     }
 
-    /**
-     * @return float
-     */
-    public function getEngineCC()
+    public function getEngineCC(): ?int
     {
         return $this->engineCC;
     }
 
-    /**
-     * @return int
-     */
-    public function getHorsePower()
+    public function getHorsePower(): int
     {
         return $this->horsePower;
     }
 
-    /**
-     * @return int
-     */
-    public function getWeight()
+    public function getWeight(): int
     {
         return $this->weight;
     }
 
-    /**
-     * @return int
-     */
-    public function getCatalogPrice()
+    public function getCatalogPrice(): ?int
     {
         return $this->catalogPrice;
     }
 
-    /**
-     * @return bool
-     */
-    public function isMotorcycle()
+    public function isMotorcycle(): bool
     {
         return $this->rdwClass === self::CLASS_MOTORCYCLE || $this->rdwClass === self::CLASS_MOTORCYCLE_WITH_SIDECAR;
     }
 
-    /**
-     * @return bool
-     */
-    public function isStolen()
+    public function isStolen(): bool
     {
         return $this->isStolen;
     }
 
-    /**
-     * @return string
-     */
-    public function getRawResponse()
+    public function getRawResponse(): string
     {
         return $this->rawResponse;
     }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 use InMotivClient\Container\VehicleInfoContainer;
 use InMotivClient\InMotivClient;
 use InMotivClient\ProductionEndpointProvider;
@@ -7,53 +9,46 @@ use InMotivClient\XmlBuilder;
 
 class InMotivClientTest extends PHPUnit_Framework_TestCase
 {
-    public function testIsDriverLicenceValidValid()
+    public function testIsDriverLicenceValidValid(): void
     {
-        $this->assertTrue($this->getProductionClient()->isDriverLicenceValid(
-            getenv('DRIVER_LICENCE_NUMBER'),
-            getenv('BIRTHDAY_YEAR'),
-            getenv('BIRTHDAY_MONTH'),
-            getenv('BIRTHDAY_DAY')
-        ));
+        $this->assertTrue(
+            $this->getProductionClient()->isDriverLicenceValid(
+                (int)getenv('DRIVER_LICENCE_NUMBER'),
+                (int)getenv('BIRTHDAY_YEAR'),
+                (int)getenv('BIRTHDAY_MONTH'),
+                (int)getenv('BIRTHDAY_DAY')
+            )
+        );
     }
 
-    public function testIsDriverLicenceValidInvalid()
+    public function testIsDriverLicenceValidInvalid(): void
     {
-        $this->assertFalse($this->getProductionClient()->isDriverLicenceValid(
-            str_repeat('1', strlen(getenv('DRIVER_LICENCE_NUMBER'))),
-            getenv('BIRTHDAY_YEAR'),
-            getenv('BIRTHDAY_MONTH'),
-            getenv('BIRTHDAY_DAY')
-        ));
-    }
-
-    /**
-     * @expectedException \InMotivClient\Exception\IncorrectFieldException
-     */
-    public function testIsDriverLicenceValidWrongNumber()
-    {
-        $this->assertFalse($this->getProductionClient()->isDriverLicenceValid(
-            1,
-            getenv('BIRTHDAY_YEAR'),
-            getenv('BIRTHDAY_MONTH'),
-            getenv('BIRTHDAY_DAY')
-        ));
+        $this->assertFalse(
+            $this->getProductionClient()->isDriverLicenceValid(
+                (int)str_repeat('1', strlen(getenv('DRIVER_LICENCE_NUMBER'))),
+                (int)getenv('BIRTHDAY_YEAR'),
+                (int)getenv('BIRTHDAY_MONTH'),
+                (int)getenv('BIRTHDAY_DAY')
+            )
+        );
     }
 
     /**
      * @expectedException \InMotivClient\Exception\IncorrectFieldException
      */
-    public function testIsDriverLicenceValidwrongDate()
+    public function testIsDriverLicenceValidwrongDate(): void
     {
-        $this->assertTrue($this->getProductionClient()->isDriverLicenceValid(
-            getenv('DRIVER_LICENCE_NUMBER'),
-            99,
-            getenv('BIRTHDAY_MONTH'),
-            getenv('BIRTHDAY_DAY')
-        ));
+        $this->assertTrue(
+            $this->getProductionClient()->isDriverLicenceValid(
+                (int)getenv('DRIVER_LICENCE_NUMBER'),
+                99,
+                (int)getenv('BIRTHDAY_MONTH'),
+                (int)getenv('BIRTHDAY_DAY')
+            )
+        );
     }
 
-    public function testVehicleInfoSuccessCar()
+    public function testVehicleInfoSuccessCar(): void
     {
         $result = $this->getProductionClient()->getVehicleInfo(getenv('NUMBERPLATES_CAR'));
         $this->assertInstanceOf(VehicleInfoContainer::class, $result);
@@ -67,7 +62,7 @@ class InMotivClientTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($result->isStolen());
     }
 
-    public function testVehicleInfoSuccessMotorcycle()
+    public function testVehicleInfoSuccessMotorcycleNormal(): void
     {
         $result = $this->getProductionClient()->getVehicleInfo(getenv('NUMBERPLATES_MOTORCYCLE'));
         $this->assertInstanceOf(VehicleInfoContainer::class, $result);
@@ -76,7 +71,37 @@ class InMotivClientTest extends PHPUnit_Framework_TestCase
         $this->assertSame(2005, $result->getProductionYear());
         $this->assertSame(53, $result->getHorsePower());
         $this->assertSame(221, $result->getWeight());
-        $this->assertSame(0, $result->getCatalogPrice());
+        $this->assertSame(null, $result->getCatalogPrice());
+        $this->assertTrue($result->isMotorcycle());
+        $this->assertFalse($result->isStolen());
+    }
+
+    public function testVehicleInfoSuccessMotorcycleElectric(): void
+    {
+        $result = $this->getProductionClient()->getVehicleInfo(getenv('NUMBERPLATES_MOTORCYCLE_ELECTRIC'));
+        $this->assertInstanceOf(VehicleInfoContainer::class, $result);
+        $this->assertSame('ENERGICA', $result->getBrand());
+        $this->assertSame(null, $result->getEngineCC());
+        $this->assertSame(2016, $result->getProductionYear());
+        $this->assertSame(0, $result->getHorsePower());
+        $this->assertSame(282, $result->getWeight());
+        $this->assertSame(null, $result->getCatalogPrice());
+        $this->assertTrue($result->isMotorcycle());
+        $this->assertFalse($result->isStolen());
+    }
+
+    public function testVehicleInfoSuccessMotorcycleWithoutFirstRegistrationDate(): void
+    {
+        $result = $this->getProductionClient()->getVehicleInfo(
+            getenv('NUMBERPLATES_MOTORCYCLE_WITHOUT_FIRST_REGISTRATION_DATE')
+        );
+        $this->assertInstanceOf(VehicleInfoContainer::class, $result);
+        $this->assertSame('KTM', $result->getBrand());
+        $this->assertSame(373, $result->getEngineCC());
+        $this->assertSame(null, $result->getProductionYear());
+        $this->assertSame(44, $result->getHorsePower());
+        $this->assertSame(159, $result->getWeight());
+        $this->assertSame(null, $result->getCatalogPrice());
         $this->assertTrue($result->isMotorcycle());
         $this->assertFalse($result->isStolen());
     }
@@ -84,7 +109,7 @@ class InMotivClientTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InMotivClient\Exception\VehicleNotFoundException
      */
-    public function testVehicleInfoFail()
+    public function testVehicleInfoFail(): void
     {
         $this->getProductionClient()->getVehicleInfo(str_repeat('1', strlen(getenv('NUMBERPLATES_CAR'))));
     }
@@ -92,15 +117,12 @@ class InMotivClientTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InMotivClient\Exception\XmlBuilder\RequestXmlInvalidException
      */
-    public function testVehicleInfoInvalidRequestXml()
+    public function testVehicleInfoInvalidRequestXml(): void
     {
         $this->getProductionClient()->getVehicleInfo('invalid < xml & value');
     }
 
-    /**
-     * @return InMotivClient
-     */
-    private function getProductionClient()
+    private function getProductionClient(): InMotivClient
     {
         $endpointProvider = new ProductionEndpointProvider();
         $xmlBuilder = new XmlBuilder();
@@ -114,10 +136,7 @@ class InMotivClientTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @return InMotivClient
-     */
-    private function getSandboxClient()
+    private function getSandboxClient(): InMotivClient
     {
         $endpointProvider = new SandboxEndpointProvider();
         $xmlBuilder = new XmlBuilder();
