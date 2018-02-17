@@ -3,5 +3,6 @@ php:
   - "7.1"
   - "7.2"
 before_install:
+ - find app -name '*.php'|xargs -L1 php -l
  - composer install
-script: find app -name '*.php'|xargs -L1 php -l && ./vendor/bin/phpcs -v
+script: ./vendor/bin/phpcs -v
