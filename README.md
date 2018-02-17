@@ -1,5 +1,7 @@
 # InMotiv RDC SOAP PHP client
 
+[![Build Status](https://travis-ci.org/caseycs/inmotiv-sdk-php.svg?branch=master)](https://travis-ci.org/caseycs/inmotiv-sdk-php)
+
 InMotiv (https://www.rdc.nl/) is one of the official RDW partners. It provides SOAP endpoints to access RDW database.
 For example you can check whether driver licence is valid or not by number and owner birthday. 
 
