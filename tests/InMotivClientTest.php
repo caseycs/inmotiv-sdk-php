@@ -36,7 +36,7 @@ class InMotivClientTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException \InMotivClient\Exception\IncorrectFieldException
      */
-    public function testIsDriverLicenceValidwrongDate(): void
+    public function testIsDriverLicenceValidWrongDate(): void
     {
         $this->assertTrue(
             $this->getProductionClient()->isDriverLicenceValid(
