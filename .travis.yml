@@ -4,4 +4,4 @@ php:
   - "7.2"
 before_install:
  - composer install
-script: ./vendor/bin/phpcs -v
+script: find app -name '*.php'|xargs -L1 php -l && ./vendor/bin/phpcs -v
